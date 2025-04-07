@@ -1,0 +1,37 @@
+{
+  "name": "maccesar/laravel-glide-enhanced",
+  "description": "Enhanced dynamic image processing for Laravel using Glide",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "MacCesar\\LaravelGlideEnhanced\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "César Estrada"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.0",
+    "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
+    "spatie/laravel-glide": "^3.6"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0",
+    "phpunit/phpunit": "^9.5|^10.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MacCesar\\LaravelGlideEnhanced\\ImageProcessorServiceProvider"
+      ],
+      "aliases": {
+        "ImageProcessor": "MacCesar\\LaravelGlideEnhanced\\Facades\\ImageProcessor"
+      }
+    }
+  }
+}
