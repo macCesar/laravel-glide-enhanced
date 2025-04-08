@@ -101,6 +101,22 @@ $product->getImageWebpUrl('main', 300);
 $product->getImagePreset('main', 'thumbnail');
 ```
 
+### Responsive Images with srcset
+
+The package provides a convenient way to generate srcset attributes for responsive images with different pixel densities:
+
+```php
+use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+
+// Generate srcset for 1x, 2x, and 3x pixel densities
+ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'fm' => 'webp']);
+// Output: "/img/storage/path/to/image.jpg?w=300&fm=webp 1x, /img/storage/path/to/image.jpg?w=600&fm=webp 2x, /img/storage/path/to/image.jpg?w=900&fm=webp 3x"
+
+// Control the maximum density factor (e.g., up to 2x)
+ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fm' => 'webp'], 2);
+// Output: "/img/storage/path/to/image.jpg?w=300&h=200&fm=webp 1x, /img/storage/path/to/image.jpg?w=600&h=400&fm=webp 2x"
+```
+
 ## Cache Cleaning
 
 To clean the image cache, use the command:

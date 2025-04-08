@@ -107,4 +107,45 @@ class ImageProcessor
 
     return $this->url($path, $params);
   }
+
+  /**
+   * Generates a srcset attribute string with multiple pixel density variants
+   *
+   * @param string $path Image path
+   * @param array $params Processing parameters (width, height, etc.)
+   * @param int $maxFactor Maximum pixel density factor (e.g., 3 for 1x, 2x, 3x)
+   * @return string Generated srcset string ready for HTML use
+   */
+  public function srcset(string $path, array $params = [], int $maxFactor = 3): string
+  {
+    // Validate and limit the maximum factor
+    $maxFactor = max(1, min(5, $maxFactor)); // Limit between 1 and 5
+
+    $srcsetParts = [];
+    $baseWidth = $params['w'] ?? null;
+    $baseHeight = $params['h'] ?? null;
+
+    // Generate variants from 1x to maxFactor
+    for ($factor = 1; $factor <= $maxFactor; $factor++) {
+      $variantParams = $params;
+
+      // Scale width and height according to the factor
+      if ($baseWidth !== null) {
+        $variantParams['w'] = (int)($baseWidth * $factor);
+      }
+
+      if ($baseHeight !== null) {
+        $variantParams['h'] = (int)($baseHeight * $factor);
+      }
+
+      // Generate URL for this variant
+      $url = $this->url($path, $variantParams);
+
+      // Add to srcset with appropriate descriptor
+      $srcsetParts[] = "{$url} {$factor}x";
+    }
+
+    // Join all parts with commas
+    return implode(', ', $srcsetParts);
+  }
 }
