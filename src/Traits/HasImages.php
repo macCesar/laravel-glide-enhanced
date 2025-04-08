@@ -48,18 +48,18 @@ trait HasImages
    */
   protected function getImagePath($type = 'default')
   {
-    // Si el modelo tiene un método getTypeImagePath, usarlo
+    // Check if the model has a specific method for the type
     $method = 'get' . Str::studly($type) . 'ImagePath';
     if (method_exists($this, $method)) {
       return $this->{$method}();
     }
 
-    // Si el modelo tiene una propiedad con el nombre del tipo
+    // Check if the model has a property with the type name
     if (isset($this->{$type})) {
       return $this->{$type};
     }
 
-    // Compatibilidad con nombres anteriores (para no romper código existente)
+    // Backward compatibility with previous names (to avoid breaking existing code)
     if ($type === 'default') {
       if (isset($this->image)) {
         return $this->image;
@@ -81,19 +81,19 @@ trait HasImages
    */
   protected function getDefaultImageUrl($type = 'default')
   {
-    // Si hay un método específico para el tipo, usarlo
+    // Check if there's a specific method for the type
     $method = 'getDefault' . Str::studly($type) . 'ImageUrl';
     if (method_exists($this, $method)) {
       return $this->{$method}();
     }
 
-    // Obtener la configuración de imagen predeterminada por tipo
+    // Get default image configuration by type
     $defaults = config('images.defaults', []);
     if (isset($defaults[$type])) {
       return asset('img/' . $defaults[$type]);
     }
 
-    // Valor predeterminado general
+    // General default value
     return asset('img/defaults/no-image.jpg');
   }
 
