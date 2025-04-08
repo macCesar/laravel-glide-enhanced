@@ -63,9 +63,16 @@ class ImageController
       // Get the full path of the image from the appropriate disk
       $sourcePath = Storage::disk($disk)->path($path);
 
+      // Check if watermark is being used and convert relative path to absolute
+      $params = $request->all();
+      if (isset($params['mark'])) {
+        // Convert the relative path of watermark to absolute path
+        $params['mark'] = Storage::disk('public')->path($params['mark']);
+      }
+
       // Manipulate the image with spatie/laravel-glide
       GlideImage::create($sourcePath)
-        ->modify($request->all())
+        ->modify($params)
         ->save(Storage::path($cachePath));
     } catch (\Exception $e) {
       Log::error("Error manipulating image: " . $e->getMessage(), [
@@ -178,9 +185,16 @@ class ImageController
       // Get the full path of the image from the appropriate disk
       $sourcePath = Storage::disk($disk)->path($path);
 
+      // Check if watermark is being used and convert relative path to absolute
+      $params = $request->all();
+      if (isset($params['mark'])) {
+        // Convert the relative path of watermark to absolute path
+        $params['mark'] = Storage::disk('public')->path($params['mark']);
+      }
+
       // Manipulate the image with spatie/laravel-glide
       GlideImage::create($sourcePath)
-        ->modify($request->all())
+        ->modify($params)
         ->save(Storage::path($cachePath));
     } catch (\Exception $e) {
       Log::error("Error manipulating default image: " . $e->getMessage(), [
