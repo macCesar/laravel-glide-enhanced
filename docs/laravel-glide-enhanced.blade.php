@@ -99,11 +99,11 @@ $url = Img::url('path/to/image.jpg', ['w' => 600 ])
             <h2 class="text-xl font-semibold text-gray-600">WebP Format</h2>
           </div>
           <div class="flex items-center justify-center p-6" style="flex-grow: 1;">
-            <img alt="WebP" class="h-auto max-w-full" src="{{ Img::webpUrl('mountainlake.jpg', 300) }}">
+            <img alt="WebP" class="h-auto max-w-full" src="{{ Img::webpUrl('mountainlake.jpg', ['w' => 300]) }}">
           </div>
           <div class="bg-gray-50 px-4 py-3" style="margin-top: auto;">
             <p class="text-sm text-gray-600">Converted to WebP format for optimization</p>
-            <code class="mt-2 block text-xs text-gray-500">@{{ Img::webpUrl('mountainlake.jpg', 300) }}</code>
+            <code class="mt-2 block text-xs text-gray-500">@{{ Img::webpUrl('mountainlake.jpg', ['w' => 300]) }}</code>
           </div>
         </div>
 
@@ -476,7 +476,7 @@ use MacCesar\LaravelGlideEnhanced\Traits\HasImages;
 class Product extends Model
 {
     use HasImages;
-    
+
     // ...
 }
 

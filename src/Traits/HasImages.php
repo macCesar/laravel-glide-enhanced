@@ -88,9 +88,9 @@ trait HasImages
     }
 
     // Get default image configuration by type
-    $defaults = config('images.defaults', []);
-    if (isset($defaults[$type])) {
-      return asset('img/' . $defaults[$type]);
+    $fallbacks = config('images.fallback_images', []);
+    if (isset($fallbacks[$type])) {
+      return asset('img/' . $fallbacks[$type]);
     }
 
     // General default value
@@ -182,16 +182,13 @@ trait HasImages
   }
 
   /**
-   * Generates a URL for a responsive WebP image
+   * Generates a URL for a WebP image
    *
    * @param string $type Image type identifier (default, main, thumbnail, etc.)
-   * @param int $width Desired width
-   * @param int|null $height Desired height (optional)
-   * @param string $fit Fit method (crop, contain, max, fill)
-   * @param int $quality Image quality (0-100)
+   * @param array $params Processing parameters
    * @return string
    */
-  public function getImageWebpUrl($type = 'default', $width, $height = null, $fit = 'max', $quality = 85)
+  public function getImageWebpUrl($type = 'default', array $params = [])
   {
     $imagePath = $this->getImagePath($type);
 
@@ -199,7 +196,7 @@ trait HasImages
       return $this->getDefaultImageUrl($type);
     }
 
-    return ImageProcessor::webpUrl($imagePath, $width, $height, $fit, $quality);
+    return ImageProcessor::webpUrl($imagePath, $params);
   }
 
   /**

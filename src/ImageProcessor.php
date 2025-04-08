@@ -37,23 +37,27 @@ class ImageProcessor
    * Generates WebP URL with specific parameters
    *
    * @param string $path Image path
-   * @param int $width Desired width
-   * @param int|null $height Desired height (optional)
-   * @param string $fit Fit method (crop, contain, max, fill)
-   * @param int $quality Image quality (0-100)
+   * @param array $params Processing parameters
    * @return string
    */
-  public function webpUrl(string $path, int $width, ?int $height = null, string $fit = 'max', int $quality = 85): string
+  public function webpUrl(string $path, array $params = []): string
   {
-    $params = [
-      'w' => $width,
-      'fm' => 'webp',
-      'fit' => $fit,
-      'q' => $quality
-    ];
+    // Get default settings from config
+    $defaultFit = config('images.defaults.fit', 'max');
+    $defaultQuality = config('images.defaults.quality', 85);
+    $defaultFormat = config('images.defaults.format', 'webp');
 
-    if ($height !== null) {
-      $params['h'] = $height;
+    // Ensure format is set to webp (this method is specifically for WebP)
+    $params['fm'] = $defaultFormat;
+
+    // Set default quality if not specified
+    if (!isset($params['q'])) {
+      $params['q'] = $defaultQuality;
+    }
+
+    // Set default fit if not specified
+    if (!isset($params['fit'])) {
+      $params['fit'] = $defaultFit;
     }
 
     return $this->url($path, $params);
@@ -68,11 +72,16 @@ class ImageProcessor
    */
   public function preset(string $path, string $preset = 'thumbnail'): string
   {
+    // Get default settings
+    $defaultFit = config('images.defaults.fit', 'max');
+    $defaultQuality = config('images.defaults.quality', 85);
+
+    // Get presets from configuration
     $presets = config('images.presets', [
-      'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
-      'medium' => ['dimensions' => '400', 'format' => 'webp', 'fit' => 'max'],
       'large' => ['dimensions' => '800', 'format' => 'webp', 'fit' => 'max'],
+      'medium' => ['dimensions' => '400', 'format' => 'webp', 'fit' => 'max'],
       'social' => ['dimensions' => '1200x630', 'format' => 'jpg', 'fit' => 'crop'],
+      'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
     ]);
 
     if (!isset($presets[$preset])) {
@@ -80,7 +89,7 @@ class ImageProcessor
     }
 
     $config = $presets[$preset];
-    $params = ['fit' => $config['fit'] ?? 'max'];
+    $params = ['fit' => $config['fit'] ?? $defaultFit];
 
     // Format
     if (isset($config['format'])) {
@@ -88,7 +97,7 @@ class ImageProcessor
 
       // For JPEG and PJPG, set default quality if not specified
       if (in_array($config['format'], ['jpg', 'pjpg']) && !isset($params['q'])) {
-        $params['q'] = 85;
+        $params['q'] = $defaultQuality;
       }
     }
 
@@ -101,7 +110,7 @@ class ImageProcessor
         $params['fit'] = $params['fit'] ?? 'crop';
       } else {
         $params['w'] = (int)$config['dimensions'];
-        $params['fit'] = $params['fit'] ?? 'max';
+        $params['fit'] = $params['fit'] ?? $defaultFit;
       }
     }
 

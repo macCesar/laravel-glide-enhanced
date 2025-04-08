@@ -119,17 +119,17 @@ class ImageController
 
     // Try to get category mappings from configuration
     // With fallback to an empty array if it doesn't exist
-    $defaultImages = Config::get('images.defaults', [
+    $fallbackImages = Config::get('images.fallback_images', [
       'default' => 'defaults/no-image.jpg'
     ]);
 
     // First try with the specific category
-    if (array_key_exists($category, $defaultImages)) {
-      $defaultPath = $defaultImages[$category];
+    if (array_key_exists($category, $fallbackImages)) {
+      $defaultPath = $fallbackImages[$category];
     }
     // Then try with a generic image
-    else if (array_key_exists('default', $defaultImages)) {
-      $defaultPath = $defaultImages['default'];
+    else if (array_key_exists('default', $fallbackImages)) {
+      $defaultPath = $fallbackImages['default'];
     }
     // Finally use a hardcoded fallback as a last resort
     else {

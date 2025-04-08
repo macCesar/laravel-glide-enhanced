@@ -46,23 +46,35 @@ The `config/images.php` file contains several configuration options:
 
 ```php
 return [
-    // Default images by category
+    // Image cache configuration
+    'cache' => [
+        'lifetime' => 30, // days
+        'path' => 'cache/img',
+    ],
+
+    // Default processing settings
     'defaults' => [
+        'fit' => 'max',     // Default fit mode (max, crop, fill, stretch)
+        'quality' => 85,    // Default quality (0-100)
+        'format' => 'webp', // Default output format (webp, jpg, png, etc.)
+    ],
+
+    // Default fallback images by category
+    'fallback_images' => [
         'default' => 'defaults/no-image.jpg',
-        'user' => 'defaults/user.jpg',
-        'product' => 'defaults/product.jpg',
+        'documents' => 'defaults/document.jpg',
+        'evidence' => 'defaults/evidence.jpg',
+        'products' => 'defaults/product.jpg',
+        'users' => 'defaults/user.jpg',
     ],
 
     // Predefined presets for image conversion
     'presets' => [
-        'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
-        'medium' => ['dimensions' => '400', 'format' => 'webp', 'fit' => 'max'],
         'large' => ['dimensions' => '800', 'format' => 'webp', 'fit' => 'max'],
+        'medium' => ['dimensions' => '400', 'format' => 'webp', 'fit' => 'max'],
         'social' => ['dimensions' => '1200x630', 'format' => 'jpg', 'fit' => 'crop'],
+        'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
     ],
-
-    // Image cache configuration
-    'cache_days' => 30, // Days to keep images in cache
 ];
 ```
 
@@ -77,7 +89,7 @@ use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
 ImageProcessor::url('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fit' => 'crop']);
 
 // WebP optimized URL
-ImageProcessor::webpUrl('path/to/image.jpg', 300, 200, 'crop', 90);
+ImageProcessor::webpUrl('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fit' => 'crop', 'q' => 90]);
 
 // Use a predefined preset
 ImageProcessor::preset('path/to/image.jpg', 'thumbnail');
@@ -96,8 +108,8 @@ class Product extends Model
 }
 
 // Usage in code
-$product->getImageUrl('main', ['w' => 300]);
 $product->getImageWebpUrl('main', 300);
+$product->getImageUrl('main', ['w' => 300]);
 $product->getImagePreset('main', 'thumbnail');
 ```
 
