@@ -14,5 +14,5 @@ use MacCesar\LaravelGlideEnhanced\Http\Controllers\ImageController;
 */
 
 Route::get('/img/{path}', [ImageController::class, 'show'])
-    ->where('path', '.*')
-    ->name('images.show');
+  ->where('path', '.*')
+  ->name('images.show');

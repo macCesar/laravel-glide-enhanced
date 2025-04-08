@@ -12,6 +12,12 @@ A Laravel package for dynamic image processing based on [Spatie/Laravel-Glide](h
 - `HasImages` trait for Eloquent models
 - `ImageProcessor` facade for easy access
 
+## Current Limitations
+
+- The package currently works only with local files (using the 'local' and 'public' disks)
+- External storage services like AWS S3 are not fully supported for image processing
+- URLs from external services are recognized but cannot be dynamically processed
+
 ## Installation
 
 You can install the package via composer:
