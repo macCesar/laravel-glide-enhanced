@@ -11,20 +11,21 @@ trait HasImages
   /**
    * Generates the URL for a processed image associated with this model
    *
+   * @param string $type Image type identifier (default, main, thumbnail, etc.)
    * @param string|null $dimensions Format: '300' or '300x200' (width x height)
    * @param string $format Output format (jpg, png, webp, pjpg)
    * @param string|null $watermark Watermark to apply
    * @param array $extraParams Additional parameters for Glide
    * @return string URL of the processed image
    */
-  public function fotoUrl($dimensions = null, $format = 'pjpg', $watermark = null, $extraParams = [])
+  public function getImageUrl($type = 'default', $dimensions = null, $format = 'pjpg', $watermark = null, $extraParams = [])
   {
     // Get the image path from the model property
-    $imagePath = $this->getFotoPath();
+    $imagePath = $this->getImagePath($type);
 
     // If there's no image, return a default image
     if (empty($imagePath)) {
-      return $this->getDefaultImageUrl();
+      return $this->getDefaultImageUrl($type);
     }
 
     // If there are no dimensions, return the original URL
@@ -42,17 +43,31 @@ trait HasImages
   /**
    * Get the image path for this model (customizable in each model)
    *
+   * @param string $type Image type identifier (default, main, thumbnail, etc.)
    * @return string|null
    */
-  protected function getFotoPath()
+  protected function getImagePath($type = 'default')
   {
-    // Default implementation - override in specific models if necessary
-    if (isset($this->foto)) {
-      return $this->foto;
-    } elseif (isset($this->imagen)) {
-      return $this->imagen;
-    } elseif (isset($this->image)) {
-      return $this->image;
+    // Si el modelo tiene un método getTypeImagePath, usarlo
+    $method = 'get' . Str::studly($type) . 'ImagePath';
+    if (method_exists($this, $method)) {
+      return $this->{$method}();
+    }
+
+    // Si el modelo tiene una propiedad con el nombre del tipo
+    if (isset($this->{$type})) {
+      return $this->{$type};
+    }
+
+    // Compatibilidad con nombres anteriores (para no romper código existente)
+    if ($type === 'default') {
+      if (isset($this->image)) {
+        return $this->image;
+      } elseif (isset($this->imagen)) {
+        return $this->imagen;
+      } elseif (isset($this->foto)) {
+        return $this->foto;
+      }
     }
 
     return null;
@@ -61,12 +76,25 @@ trait HasImages
   /**
    * Get the default URL for when there's no image
    *
+   * @param string $type Image type identifier (default, main, thumbnail, etc.)
    * @return string
    */
-  protected function getDefaultImageUrl()
+  protected function getDefaultImageUrl($type = 'default')
   {
-    // Override in specific models if necessary
-    return asset('img/no-image.jpg');
+    // Si hay un método específico para el tipo, usarlo
+    $method = 'getDefault' . Str::studly($type) . 'ImageUrl';
+    if (method_exists($this, $method)) {
+      return $this->{$method}();
+    }
+
+    // Obtener la configuración de imagen predeterminada por tipo
+    $defaults = config('images.defaults', []);
+    if (isset($defaults[$type])) {
+      return asset('img/' . $defaults[$type]);
+    }
+
+    // Valor predeterminado general
+    return asset('img/defaults/no-image.jpg');
   }
 
   /**
@@ -100,46 +128,33 @@ trait HasImages
    * @param array $extraParams
    * @return array
    */
-  protected function prepareImageParams($dimensions, $format, $watermark, array $extraParams)
+  protected function prepareImageParams($dimensions, $format, $watermark, $extraParams)
   {
-    $params = $extraParams;
+    $params = [];
 
-    // Interpret dimensions (300 or 300x200)
-    if (strpos($dimensions, 'x') !== false) {
-      list($width, $height) = explode('x', $dimensions);
-      $params['w'] = (int)$width;
-      $params['h'] = (int)$height;
-      $params['fit'] = $params['fit'] ?? 'crop';
-    } else {
-      $params['w'] = (int)$dimensions;
-      $params['fit'] = $params['fit'] ?? 'max';
+    // Handle dimensions (width/height)
+    if (!empty($dimensions)) {
+      if (strpos($dimensions, 'x') !== false) {
+        list($width, $height) = explode('x', $dimensions);
+        $params['w'] = $width;
+        $params['h'] = $height;
+      } else {
+        $params['w'] = $dimensions;
+      }
     }
 
-    // Format
-    if ($format) {
+    // Handle format
+    if (!empty($format)) {
       $params['fm'] = $format;
-
-      // For JPEG and PJPG, set default quality if not specified
-      if (in_array($format, ['jpg', 'pjpg']) && !isset($params['q'])) {
-        $params['q'] = 85;
-      }
     }
 
-    // Watermark (if enabled)
-    if ($watermark) {
+    // Handle watermark
+    if (!empty($watermark)) {
       $params['mark'] = $watermark;
-      if (!isset($params['markw'])) {
-        $params['markw'] = 50; // Watermark width as % of the image
-      }
-      if (!isset($params['markalpha'])) {
-        $params['markalpha'] = 60; // Transparency (0-100)
-      }
-      if (!isset($params['markpos'])) {
-        $params['markpos'] = 'bottom-right'; // Position
-      }
     }
 
-    return $params;
+    // Merge additional parameters
+    return array_merge($params, $extraParams);
   }
 
   /**
@@ -149,70 +164,59 @@ trait HasImages
    * @param array $params
    * @return string
    */
-  protected function generateImageUrl($path, array $params)
+  protected function generateImageUrl($path, $params)
   {
-    // Make sure the path doesn't start with /
-    $path = ltrim($path, '/');
-
-    // If it doesn't start with storage/, add it
-    if (!Str::startsWith($path, 'storage/')) {
-      $path = 'storage/' . $path;
+    // If the path is already a complete URL, we can't process it
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+      return $path;
     }
 
-    // Build the URL with the parameters
-    $url = url('/img/' . $path);
-
-    if (!empty($params)) {
-      $url .= '?' . http_build_query($params);
+    // If the path starts with 'storage/', adjust it
+    if (Str::startsWith($path, 'storage/')) {
+      $path = substr($path, strlen('storage/'));
+      return url('/img/storage/' . $path) . '?' . http_build_query($params);
     }
 
-    return $url;
+    // Use the image processor
+    return url('/img/storage/' . $path) . '?' . http_build_query($params);
   }
 
   /**
    * Generates a URL for a responsive WebP image
    *
+   * @param string $type Image type identifier (default, main, thumbnail, etc.)
    * @param int $width Desired width
    * @param int|null $height Desired height (optional)
    * @param string $fit Fit method (crop, contain, max, fill)
    * @param int $quality Image quality (0-100)
    * @return string
    */
-  public function webpUrl($width, $height = null, $fit = 'max', $quality = 85)
+  public function getImageWebpUrl($type = 'default', $width, $height = null, $fit = 'max', $quality = 85)
   {
-    $dimensions = $height ? "{$width}x{$height}" : (string)$width;
-    return $this->fotoUrl($dimensions, 'webp', null, [
-      'fit' => $fit,
-      'q' => $quality
-    ]);
+    $imagePath = $this->getImagePath($type);
+
+    if (empty($imagePath)) {
+      return $this->getDefaultImageUrl($type);
+    }
+
+    return ImageProcessor::webpUrl($imagePath, $width, $height, $fit, $quality);
   }
 
   /**
    * Applies predefined manipulations to images
    *
+   * @param string $type Image type identifier (default, main, thumbnail, etc.)
    * @param string $preset Preset name (thumbnail, medium, large, etc)
    * @return string URL of the processed image
    */
-  public function imagePreset($preset = 'thumbnail')
+  public function getImagePreset($type = 'default', $preset = 'thumbnail')
   {
-    $presets = config('images.presets', [
-      'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
-      'medium' => ['dimensions' => '400', 'format' => 'webp', 'fit' => 'max'],
-      'large' => ['dimensions' => '800', 'format' => 'webp', 'fit' => 'max'],
-      'social' => ['dimensions' => '1200x630', 'format' => 'jpg', 'fit' => 'crop'],
-    ]);
+    $imagePath = $this->getImagePath($type);
 
-    if (!isset($presets[$preset])) {
-      $preset = 'thumbnail';
+    if (empty($imagePath)) {
+      return $this->getDefaultImageUrl($type);
     }
 
-    $config = $presets[$preset];
-
-    return $this->fotoUrl(
-      $config['dimensions'],
-      $config['format'] ?? 'webp',
-      null,
-      ['fit' => $config['fit'] ?? 'max']
-    );
+    return ImageProcessor::preset($imagePath, $preset);
   }
 }
