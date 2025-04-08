@@ -52,7 +52,7 @@ return [
         'user' => 'defaults/user.jpg',
         'product' => 'defaults/product.jpg',
     ],
-    
+
     // Predefined presets for image conversion
     'presets' => [
         'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
@@ -60,7 +60,7 @@ return [
         'large' => ['dimensions' => '800', 'format' => 'webp', 'fit' => 'max'],
         'social' => ['dimensions' => '1200x630', 'format' => 'jpg', 'fit' => 'crop'],
     ],
-    
+
     // Image cache configuration
     'cache_days' => 30, // Days to keep images in cache
 ];
@@ -91,7 +91,7 @@ use MacCesar\LaravelGlideEnhanced\Traits\HasImages;
 class Product extends Model
 {
     use HasImages;
-    
+
     // ...
 }
 
@@ -116,6 +116,19 @@ ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'fm' => 'webp']);
 ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fm' => 'webp'], 2);
 // Output: "/img/storage/path/to/image.jpg?w=300&h=200&fm=webp 1x, /img/storage/path/to/image.jpg?w=600&h=400&fm=webp 2x"
 ```
+
+### Applying Watermarks
+
+You can apply watermarks to your images using the following parameters:
+
+```php
+use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+
+// Apply watermark
+ImageProcessor::url('path/to/image.jpg', ['w' => 600, 'mark' => 'watermarks/logo.png', 'markw' => 200, 'markpos' => 'bottom-right', 'markalpha' => 60]);
+```
+
+> **Important note**: The watermark image must exist at the specified path within `storage/app/public/`. For example, if you use `'mark' => 'watermarks/logo.png'`, the file should be located at `storage/app/public/watermarks/logo.png`.
 
 ## Cache Cleaning
 
