@@ -21,8 +21,8 @@ class ImageController
    */
   public function show(Request $request, $path)
   {
-    // Always use the 'public' disk for images accessed through this route
-    $disk = 'public';
+    // Use the configured disk for images
+    $disk = config('images.disk', 'public');
 
     // Check if the image exists on the appropriate disk
     if (!Storage::disk($disk)->exists($path)) {
@@ -140,12 +140,13 @@ class ImageController
       $defaultPath = 'defaults/no-image.jpg';
     }
 
-    // Look for the image on the public disk first
-    if (Storage::disk('public')->exists($defaultPath)) {
-      return ['disk' => 'public', 'path' => $defaultPath];
+    // Look for the image on the configured disk first
+    $disk = config('images.disk', 'public');
+    if (Storage::disk($disk)->exists($defaultPath)) {
+      return ['disk' => $disk, 'path' => $defaultPath];
     }
 
-    // If it doesn't exist in public, look on the local disk
+    // If it doesn't exist in the configured disk, look on the local disk
     if (Storage::exists($defaultPath)) {
       return ['disk' => 'local', 'path' => $defaultPath];
     }

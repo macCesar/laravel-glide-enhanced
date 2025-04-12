@@ -47,6 +47,17 @@ return [
 
   /*
     |--------------------------------------------------------------------------
+    | Disk Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Specify the disk where images are stored. This can be 'public', 'local',
+    | or any other disk defined in your Laravel filesystem configuration.
+    |
+    */
+  'disk' => 'public',
+
+  /*
+    |--------------------------------------------------------------------------
     | Route Configuration
     |--------------------------------------------------------------------------
     |
