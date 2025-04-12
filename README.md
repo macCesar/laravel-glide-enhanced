@@ -86,6 +86,22 @@ return [
 ];
 ```
 
+### Disk Configuration
+
+The `disk` configuration allows you to specify where your images are stored. By default, the package uses the `public` disk, which corresponds to the `/storage/app/public` directory. If your images are stored in a different location, such as the root of `/storage/app`, you can change the disk to `local` or any other disk defined in your Laravel filesystem configuration.
+
+```php
+'disk' => 'public', // Change to 'local' if your images are in /storage/app
+```
+
+For example, if your images are stored in `/storage/app`, update the configuration as follows:
+
+```php
+'disk' => 'local',
+```
+
+Make sure the disk you specify is properly configured in your `config/filesystems.php` file.
+
 ### Route Configuration
 
 The routes section allows you to customize how the package registers its routes:
