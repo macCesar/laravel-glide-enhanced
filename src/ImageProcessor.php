@@ -7,11 +7,11 @@ use Illuminate\Support\Str;
 class ImageProcessor
 {
   /**
-   * Generates a URL for a processed image
+   * Generate the final URL for the processed image
    *
    * @param string $path Image path
    * @param array $params Processing parameters
-   * @return string Final URL of the processed image
+   * @return string
    */
   public function url(string $path, array $params = []): string
   {
@@ -26,8 +26,11 @@ class ImageProcessor
     // Remove storage/ from path for URL creation
     $urlPath = substr($path, strlen('storage/'));
 
+    // Get route prefix from config
+    $prefix = config('images.routes.prefix', 'img');
+
     // Build the URL with parameters
-    $url = url('/img/' . $urlPath);
+    $url = url('/' . $prefix . '/' . $urlPath);
     if (!empty($params)) {
       $url .= '?' . http_build_query($params);
     }

@@ -11,6 +11,7 @@ A Laravel package for dynamic image processing based on [Spatie/Laravel-Glide](h
 - Predefined presets for consistent image usage
 - `HasImages` trait for Eloquent models
 - `ImageProcessor` facade for easy access
+- Configurable routes to avoid conflicts with other packages
 
 ## Current Limitations
 
@@ -59,6 +60,13 @@ return [
         'format' => 'webp', // Default output format (webp, jpg, png, etc.)
     ],
 
+    // Routes configuration
+    'routes' => [
+        'enabled' => true,       // Enable/disable package routes
+        'prefix' => 'img',       // URL prefix for the image routes
+        'middleware' => ['web'],  // Middleware to apply to the routes
+    ],
+
     // Default fallback images by category
     'fallback_images' => [
         'default' => 'defaults/no-image.jpg',
@@ -77,6 +85,20 @@ return [
     ],
 ];
 ```
+
+### Route Configuration
+
+The routes section allows you to customize how the package registers its routes:
+
+```php
+'routes' => [
+    'enabled' => true,        // Set to false to disable all package routes
+    'prefix' => 'img',        // Change the URL prefix (e.g., 'images', 'media', etc.)
+    'middleware' => ['web'],  // Add or modify middleware applied to the routes
+],
+```
+
+If you need to avoid conflicts with other packages, you can change the route prefix or disable the routes entirely and implement your own.
 
 ## Basic Usage
 
@@ -155,6 +177,15 @@ To clean only images older than a specific number of days:
 ```bash
 php artisan images:clean-cache --days=7
 ```
+
+## Components Registered
+
+This package registers the following components in Laravel:
+
+- **Routes**: A route with the prefix `/img/` (configurable via the `routes.prefix` config)
+- **Services**: A singleton `image-processor` in the container
+- **Facade**: `ImageProcessor` for easy access to the service
+- **Command**: `images:clean-cache` for cache maintenance
 
 ## License
 

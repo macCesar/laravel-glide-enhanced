@@ -13,6 +13,12 @@ use MacCesar\LaravelGlideEnhanced\Http\Controllers\ImageController;
 |
 */
 
-Route::get('/img/{path}', [ImageController::class, 'show'])
-  ->where('path', '.*')
-  ->name('images.show');
+if (config('images.routes.enabled', true)) {
+  Route::prefix(config('images.routes.prefix', 'img'))
+    ->middleware(config('images.routes.middleware', ['web']))
+    ->group(function () {
+      Route::get('/{path}', [ImageController::class, 'show'])
+        ->where('path', '.*')
+        ->name('images.show');
+    });
+}

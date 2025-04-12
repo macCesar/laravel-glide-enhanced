@@ -38,8 +38,10 @@ class ImageProcessorServiceProvider extends ServiceProvider
       __DIR__ . '/../config/images.php' => config_path('images.php'),
     ], 'images-config');
 
-    // Load routes
-    $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+    // Load routes only if enabled
+    if (config('images.routes.enabled', true)) {
+      $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+    }
 
     // Register commands
     if ($this->app->runningInConsole()) {
