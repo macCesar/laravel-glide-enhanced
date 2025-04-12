@@ -15,17 +15,19 @@ class ImageProcessor
    */
   public function url(string $path, array $params = []): string
   {
-    // Make sure the path doesn't start with /
+    // Normalize path first
     $path = ltrim($path, '/');
 
-    // If it doesn't start with storage/, add it
+    // Always ensure we have storage/ prefix for internal use
     if (!Str::startsWith($path, 'storage/')) {
       $path = 'storage/' . $path;
     }
 
-    // Build the URL with parameters
-    $url = url('/img/' . $path);
+    // Remove storage/ from path for URL creation
+    $urlPath = substr($path, strlen('storage/'));
 
+    // Build the URL with parameters
+    $url = url('/img/' . $urlPath);
     if (!empty($params)) {
       $url .= '?' . http_build_query($params);
     }

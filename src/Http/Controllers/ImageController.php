@@ -21,12 +21,8 @@ class ImageController
    */
   public function show(Request $request, $path)
   {
-    // If the path starts with "storage/", adjust the search to use the 'public' disk
-    $disk = 'local';
-    if (strpos($path, 'storage/') === 0) {
-      $path = substr($path, strlen('storage/'));
-      $disk = 'public';
-    }
+    // Always use the 'public' disk for images accessed through this route
+    $disk = 'public';
 
     // Check if the image exists on the appropriate disk
     if (!Storage::disk($disk)->exists($path)) {
@@ -41,7 +37,7 @@ class ImageController
 
     // If there are no manipulation parameters, serve the original image
     if (empty($request->all())) {
-      return $this->serveImage(Storage::disk($disk)->path($path));
+      return $this->serveGlideImage(Storage::disk($disk)->path($path));
     }
 
     // Create a unique hash for this combination of image and parameters
@@ -50,13 +46,21 @@ class ImageController
 
     // Check if it exists in cache
     if (Storage::exists($cachePath)) {
-      return $this->serveImage(Storage::path($cachePath), true);
+      return $this->serveGlideImage(Storage::path($cachePath), true);
     }
 
-    // Prepare cache directory
+    // Prepare cache directory - Fixed to be concurrency-safe
     $cacheDirectory = dirname(Storage::path($cachePath));
-    if (!file_exists($cacheDirectory)) {
-      mkdir($cacheDirectory, 0755, true);
+    if (!is_dir($cacheDirectory)) {
+      try {
+        @mkdir($cacheDirectory, 0755, true);
+      } catch (\Exception $e) {
+        // Directory might have been created by another process
+        // Only log if it's not a "directory exists" issue
+        if (!is_dir($cacheDirectory)) {
+          Log::error("Failed to create cache directory: " . $e->getMessage());
+        }
+      }
     }
 
     try {
@@ -82,13 +86,13 @@ class ImageController
       throw $e;
     }
 
-    return $this->serveImage(Storage::path($cachePath), false);
+    return $this->serveGlideImage(Storage::path($cachePath), false);
   }
 
   /**
    * Serves an image to the browser
    */
-  protected function serveImage($imagePath, $fromCache = null)
+  protected function serveGlideImage($imagePath, $fromCache = null)
   {
     if (!file_exists($imagePath)) {
       throw new NotFoundHttpException("Image not found in file system");
@@ -163,7 +167,7 @@ class ImageController
 
     // If there are no manipulation parameters, serve the original image
     if (empty($request->all())) {
-      return $this->serveImage(Storage::disk($disk)->path($path));
+      return $this->serveGlideImage(Storage::disk($disk)->path($path));
     }
 
     // Create a unique hash for this combination of image and parameters
@@ -172,13 +176,21 @@ class ImageController
 
     // Check if it exists in cache
     if (Storage::exists($cachePath)) {
-      return $this->serveImage(Storage::path($cachePath), true);
+      return $this->serveGlideImage(Storage::path($cachePath), true);
     }
 
-    // Prepare cache directory
+    // Prepare cache directory - Fixed to be concurrency-safe
     $cacheDirectory = dirname(Storage::path($cachePath));
-    if (!file_exists($cacheDirectory)) {
-      mkdir($cacheDirectory, 0755, true);
+    if (!is_dir($cacheDirectory)) {
+      try {
+        @mkdir($cacheDirectory, 0755, true);
+      } catch (\Exception $e) {
+        // Directory might have been created by another process
+        // Only log if it's not a "directory exists" issue
+        if (!is_dir($cacheDirectory)) {
+          Log::error("Failed to create cache directory: " . $e->getMessage());
+        }
+      }
     }
 
     try {
@@ -202,9 +214,9 @@ class ImageController
         'params' => $request->all()
       ]);
       // In case of error with the default image, we try to serve the original
-      return $this->serveImage(Storage::disk($disk)->path($path));
+      return $this->serveGlideImage(Storage::disk($disk)->path($path));
     }
 
-    return $this->serveImage(Storage::path($cachePath), false);
+    return $this->serveGlideImage(Storage::path($cachePath), false);
   }
 }

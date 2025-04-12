@@ -174,11 +174,11 @@ trait HasImages
     // If the path starts with 'storage/', adjust it
     if (Str::startsWith($path, 'storage/')) {
       $path = substr($path, strlen('storage/'));
-      return url('/img/storage/' . $path) . '?' . http_build_query($params);
+      return url('/img/' . $path) . '?' . http_build_query($params);
     }
 
     // Use the image processor
-    return url('/img/storage/' . $path) . '?' . http_build_query($params);
+    return url('/img/' . $path) . '?' . http_build_query($params);
   }
 
   /**

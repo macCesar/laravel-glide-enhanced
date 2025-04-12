@@ -41,11 +41,11 @@
           <div class="rounded-lg bg-gray-50 p-4">
             <h3 class="mb-2 text-xl font-semibold text-gray-600">Getting Started</h3>
             <p class="mb-2 text-gray-600">Install the package via composer:</p>
-            <pre class="mb-4 rounded bg-gray-100 p-2 text-sm"><code>composer require maccesar/laravel-glide-enhanced</code></pre>
+            <pre class="mb-4 overflow-x-auto rounded bg-gray-100 p-2 text-sm"><code>composer require maccesar/laravel-glide-enhanced</code></pre>
             <p class="mb-2 text-gray-600">Publish the configuration:</p>
-            <pre class="mb-4 rounded bg-gray-100 p-2 text-sm"><code>php artisan vendor:publish --tag=images-config</code></pre>
+            <pre class="mb-4 overflow-x-auto rounded bg-gray-100 p-2 text-sm"><code>php artisan vendor:publish --tag=images-config</code></pre>
             <p class="mb-2 text-gray-600">Basic Usage:</p>
-            <pre class="rounded bg-gray-100 p-2 text-sm"><code>use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor as Img;
+            <pre class="overflow-x-auto rounded bg-gray-100 p-2 text-sm"><code>use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor as Img;
 
 // Generate a URL for an image with specific transformations
 $url = Img::url('path/to/image.jpg', ['w' => 600 ])
@@ -309,22 +309,22 @@ $url = Img::url('path/to/image.jpg', ['w' => 600 ])
             </div>
             <div class="flex items-center justify-center p-6" style="flex-grow: 1;">
               <picture>
-                <source media="(min-width: 1920px)" srcset="{{ Img::webpUrl('mountainlake.jpg', 1600) }} 1x, {{ Img::webpUrl('mountainlake.jpg', 3200) }} 2x">
-                <source media="(min-width: 1024px)" srcset="{{ Img::webpUrl('mountainlake.jpg', 1200) }} 1x, {{ Img::webpUrl('mountainlake.jpg', 2400) }} 2x">
-                <source media="(min-width: 768px)" srcset="{{ Img::webpUrl('mountainlake.jpg', 800) }} 1x, {{ Img::webpUrl('mountainlake.jpg', 1600) }} 2x">
-                <source media="(min-width: 640px)" srcset="{{ Img::webpUrl('mountainlake.jpg', 600) }} 1x, {{ Img::webpUrl('mountainlake.jpg', 1200) }} 2x">
-                <img alt="Responsive image" class="h-auto max-w-full" src="{{ Img::webpUrl('mountainlake.jpg', 400) }}" style="max-width: 1200px;">
+                <source media="(min-width: 1920px)" srcset="{{ Img::webpUrl('mountainlake.jpg', ['w' => 1600]) }} 1x, {{ Img::webpUrl('mountainlake.jpg', ['w' => 3200]) }} 2x">
+                <source media="(min-width: 1024px)" srcset="{{ Img::webpUrl('mountainlake.jpg', ['w' => 1200]) }} 1x, {{ Img::webpUrl('mountainlake.jpg', ['w' => 2400]) }} 2x">
+                <source media="(min-width: 768px)" srcset="{{ Img::webpUrl('mountainlake.jpg', ['w' => 800]) }} 1x, {{ Img::webpUrl('mountainlake.jpg', ['w' => 1600]) }} 2x">
+                <source media="(min-width: 640px)" srcset="{{ Img::webpUrl('mountainlake.jpg', ['w' => 600]) }} 1x, {{ Img::webpUrl('mountainlake.jpg', ['w' => 1200]) }} 2x">
+                <img alt="Responsive image" class="h-auto max-w-full" src="{{ Img::webpUrl('mountainlake.jpg', ['w' => 400]) }}" style="max-width: 1200px;">
               </picture>
             </div>
             <div class="bg-gray-50 px-4 py-3" style="margin-top: auto;">
               <p class="text-sm text-gray-600">This image automatically adapts to the screen size and pixel density</p>
               <code class="mt-2 block text-xs text-gray-500">
                 &lt;picture&gt;<br />
-                &lt;source media="(min-width: 1920px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', 1600) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', 3200) }} 2x"&gt;<br />
-                &lt;source media="(min-width: 1024px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', 1200) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', 2400) }} 2x"&gt;<br />
-                &lt;source media="(min-width: 768px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', 800) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', 1600) }} 2x"&gt;<br />
-                &lt;source media="(min-width: 640px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', 600) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', 1200) }} 2x"&gt;<br />
-                &lt;img src="@{{ Img::webpUrl('mountainlake.jpg', 400) }}" alt="Responsive image" style="max-width: 1200px;"&gt;<br />
+                &lt;source media="(min-width: 1920px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', ['w' => 1600]) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', ['w' => 3200]) }} 2x"&gt;<br />
+                &lt;source media="(min-width: 1024px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', ['w' => 1200]) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', ['w' => 2400]) }} 2x"&gt;<br />
+                &lt;source media="(min-width: 768px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', ['w' => 800]) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', ['w' => 1600]) }} 2x"&gt;<br />
+                &lt;source media="(min-width: 640px)" srcset="@{{ Img::webpUrl('mountainlake.jpg', ['w' => 600]) }} 1x, @{{ Img::webpUrl('mountainlake.jpg', ['w' => 1200]) }} 2x"&gt;<br />
+                &lt;img src="@{{ Img::webpUrl('mountainlake.jpg', ['w' => 400]) }}" alt="Responsive image" style="max-width: 1200px;"&gt;<br />
                 &lt;/picture&gt;
               </code>
             </div>
@@ -482,7 +482,7 @@ class Product extends Model
 
 // Later in your code:
 $product->getImageUrl('main', ['w' => 600]);
-$product->getImageWebpUrl('main', 300);
+$product->getImageWebpUrl('main', ['w' => 300]);
 $product->getImagePreset('main', 'thumbnail');</pre>
 
         <p class="text-gray-600">This approach allows you to associate images with your models and access them with powerful processing capabilities throughout your application.</p>

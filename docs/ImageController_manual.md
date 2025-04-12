@@ -442,7 +442,7 @@ class ImageController extends Controller
 
     // If there are no manipulation parameters, serve the original image
     if (empty($request->all())) {
-      return $this->serveImage(Storage::disk($disk)->path($path));
+      return $this->serveGlideImage(Storage::disk($disk)->path($path));
     }
 
     // Create a unique hash for this combination of image and parameters
@@ -451,7 +451,7 @@ class ImageController extends Controller
 
     // Check if it exists in cache
     if (Storage::exists($cachePath)) {
-      return $this->serveImage(Storage::path($cachePath), true);
+      return $this->serveGlideImage(Storage::path($cachePath), true);
     }
 
     // Prepare cache directory
@@ -476,13 +476,13 @@ class ImageController extends Controller
       throw $e;
     }
 
-    return $this->serveImage(Storage::path($cachePath), false);
+    return $this->serveGlideImage(Storage::path($cachePath), false);
   }
 
   /**
    * Serves an image to the browser
    */
-  protected function serveImage($imagePath, $fromCache = null)
+  protected function serveGlideImage($imagePath, $fromCache = null)
   {
     if (!file_exists($imagePath)) {
       throw new NotFoundHttpException("Image not found in file system");
@@ -557,7 +557,7 @@ class ImageController extends Controller
 
     // If there are no manipulation parameters, serve the original image
     if (empty($request->all())) {
-      return $this->serveImage(Storage::disk($disk)->path($path));
+      return $this->serveGlideImage(Storage::disk($disk)->path($path));
     }
 
     // Create a unique hash for this combination of image and parameters
@@ -566,7 +566,7 @@ class ImageController extends Controller
 
     // Check if it exists in cache
     if (Storage::exists($cachePath)) {
-      return $this->serveImage(Storage::path($cachePath), true);
+      return $this->serveGlideImage(Storage::path($cachePath), true);
     }
 
     // Prepare cache directory
@@ -589,10 +589,10 @@ class ImageController extends Controller
         'params' => $request->all()
       ]);
       // In case of error with the default image, we try to serve the original
-      return $this->serveImage(Storage::disk($disk)->path($path));
+      return $this->serveGlideImage(Storage::disk($disk)->path($path));
     }
 
-    return $this->serveImage(Storage::path($cachePath), false);
+    return $this->serveGlideImage(Storage::path($cachePath), false);
   }
 }
 ```
