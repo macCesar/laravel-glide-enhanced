@@ -67,6 +67,9 @@ return [
         'middleware' => ['web'],  // Middleware to apply to the routes
     ],
 
+    // Disk configuration. Change to 'local' if your images are in /storage/app
+    'disk' => 'public',
+
     // Default fallback images by category
     'fallback_images' => [
         'default' => 'defaults/no-image.jpg',
