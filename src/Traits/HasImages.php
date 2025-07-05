@@ -90,11 +90,13 @@ trait HasImages
     // Get default image configuration by type
     $fallbacks = config('images.fallback_images', []);
     if (isset($fallbacks[$type])) {
-      return asset('img/' . $fallbacks[$type]);
+      $prefix = config('images.routes.prefix', 'glide');
+      return asset($prefix . '/' . $fallbacks[$type]);
     }
 
     // General default value
-    return asset('img/defaults/no-image.jpg');
+    $prefix = config('images.routes.prefix', 'glide');
+    return asset($prefix . '/defaults/no-image.jpg');
   }
 
   /**
@@ -174,11 +176,13 @@ trait HasImages
     // If the path starts with 'storage/', adjust it
     if (Str::startsWith($path, 'storage/')) {
       $path = substr($path, strlen('storage/'));
-      return url('/img/' . $path) . '?' . http_build_query($params);
+      $prefix = config('images.routes.prefix', 'glide');
+      return url('/' . $prefix . '/' . $path) . '?' . http_build_query($params);
     }
 
     // Use the image processor
-    return url('/img/' . $path) . '?' . http_build_query($params);
+    $prefix = config('images.routes.prefix', 'glide');
+    return url('/' . $prefix . '/' . $path) . '?' . http_build_query($params);
   }
 
   /**

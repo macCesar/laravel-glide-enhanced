@@ -27,7 +27,7 @@ class ImageProcessor
     $urlPath = substr($path, strlen('storage/'));
 
     // Get route prefix from config
-    $prefix = config('images.routes.prefix', 'img');
+    $prefix = config('images.routes.prefix', 'glide');
 
     // Build the URL with parameters
     $url = url('/' . $prefix . '/' . $urlPath);

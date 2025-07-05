@@ -2,6 +2,15 @@
 
 A Laravel package for dynamic image processing based on [Spatie/Laravel-Glide](https://github.com/spatie/laravel-glide).
 
+## ⚠️ Important Update (v2.x)
+
+The default route prefix has changed from `/img/` to `/glide/` to avoid conflicts with other packages, especially `laravel-dropzone-enhanced`.
+
+**Before:** `http://your-site.com/img/path/image.jpg`  
+**Now:** `http://your-site.com/glide/path/image.jpg`
+
+See the [UPGRADE.md](UPGRADE.md) file for migration instructions.
+
 ## Features
 
 - Dynamic image processing (resizing, cropping, format conversion)
@@ -12,6 +21,7 @@ A Laravel package for dynamic image processing based on [Spatie/Laravel-Glide](h
 - `HasImages` trait for Eloquent models
 - `ImageProcessor` facade for easy access
 - Configurable routes to avoid conflicts with other packages
+- **Full compatibility with Laravel Dropzone Enhanced**
 
 ## Current Limitations
 
@@ -50,7 +60,7 @@ return [
     // Image cache configuration
     'cache' => [
         'lifetime' => 30, // days
-        'path' => 'cache/img',
+        'path' => 'cache/glide',
     ],
 
     // Default processing settings
@@ -63,7 +73,7 @@ return [
     // Routes configuration
     'routes' => [
         'enabled' => true,       // Enable/disable package routes
-        'prefix' => 'img',       // URL prefix for the image routes
+        'prefix' => 'glide',     // URL prefix for the image routes
         'middleware' => ['web'],  // Middleware to apply to the routes
     ],
 
@@ -112,7 +122,7 @@ The routes section allows you to customize how the package registers its routes:
 ```php
 'routes' => [
     'enabled' => true,        // Set to false to disable all package routes
-    'prefix' => 'img',        // Change the URL prefix (e.g., 'images', 'media', etc.)
+    'prefix' => 'glide',      // Change the URL prefix (e.g., 'images', 'media', etc.)
     'middleware' => ['web'],  // Add or modify middleware applied to the routes
 ],
 ```
@@ -163,11 +173,11 @@ use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
 
 // Generate srcset for 1x, 2x, and 3x pixel densities
 ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'fm' => 'webp']);
-// Output: "/img/storage/path/to/image.jpg?w=300&fm=webp 1x, /img/storage/path/to/image.jpg?w=600&fm=webp 2x, /img/storage/path/to/image.jpg?w=900&fm=webp 3x"
+// Output: "/glide/storage/path/to/image.jpg?w=300&fm=webp 1x, /glide/storage/path/to/image.jpg?w=600&fm=webp 2x, /glide/storage/path/to/image.jpg?w=900&fm=webp 3x"
 
 // Control the maximum density factor (e.g., up to 2x)
 ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fm' => 'webp'], 2);
-// Output: "/img/storage/path/to/image.jpg?w=300&h=200&fm=webp 1x, /img/storage/path/to/image.jpg?w=600&h=400&fm=webp 2x"
+// Output: "/glide/storage/path/to/image.jpg?w=300&h=200&fm=webp 1x, /glide/storage/path/to/image.jpg?w=600&h=400&fm=webp 2x"
 ```
 
 ### Applying Watermarks
@@ -201,7 +211,7 @@ php artisan images:clean-cache --days=7
 
 This package registers the following components in Laravel:
 
-- **Routes**: A route with the prefix `/img/` (configurable via the `routes.prefix` config)
+- **Routes**: A route with the prefix `/glide/` (configurable via the `routes.prefix` config)
 - **Services**: A singleton `image-processor` in the container
 - **Facade**: `ImageProcessor` for easy access to the service
 - **Command**: `images:clean-cache` for cache maintenance

@@ -36,7 +36,12 @@ class ImageProcessorServiceProvider extends ServiceProvider
     // Publish configuration
     $this->publishes([
       __DIR__ . '/../config/images.php' => config_path('images.php'),
-    ], 'images-config');
+    ], ['config', 'glide-config']);
+
+    // Publish upgrade guide
+    $this->publishes([
+      __DIR__ . '/../UPGRADE.md' => base_path('UPGRADE-GLIDE.md'),
+    ], ['docs', 'glide-docs']);
 
     // Load routes only if enabled
     if (config('images.routes.enabled', true)) {

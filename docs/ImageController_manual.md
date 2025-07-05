@@ -37,11 +37,96 @@ The system uses a configuration file `config/images.php` that allows customizing
 php artisan vendor:publish --tag=images-config
 ```
 
-The file contains the following main sections:
+The file contains the following configurations:
 
-- **defaults**: Default image configuration for different categories
-- **cache**: Cache system configuration
-- **presets**: Predefined presets for image manipulation
+```php
+return [
+  /*
+    |--------------------------------------------------------------------------
+    | Cache Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for processed image cache.
+    |
+    */
+  'cache' => [
+    'lifetime' => 30, // days
+    'path' => 'cache/img',
+  ],
+
+  /*
+    |--------------------------------------------------------------------------
+    | Default Processing Settings
+    |--------------------------------------------------------------------------
+    |
+    | Default settings for image processing.
+    |
+    */
+  'defaults' => [
+    'fit' => 'max',     // Default fit mode (max, crop, fill, stretch)
+    'quality' => 85,    // Default quality (0-100)
+    'format' => 'webp', // Default output format (webp, jpg, png, etc.)
+  ],
+
+  /*
+    |--------------------------------------------------------------------------
+    | Default Images by Category
+    |--------------------------------------------------------------------------
+    |
+    | Configuration of default images by category.
+    | These are used when a requested image is not found.
+    |
+    */
+  'fallback_images' => [
+    'default' => 'defaults/no-image.jpg',
+    'documents' => 'defaults/document.jpg',
+    'evidence' => 'defaults/evidence.jpg',
+    'products' => 'defaults/product.jpg',
+    'users' => 'defaults/user.jpg',
+  ],
+
+  /*
+    |--------------------------------------------------------------------------
+    | Disk Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Specify the disk where images are stored. This can be 'public', 'local',
+    | or any other disk defined in your Laravel filesystem configuration.
+    |
+    */
+  'disk' => 'public',
+
+  /*
+    |--------------------------------------------------------------------------
+    | Route Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure the routes registered by this package.
+    |
+    */
+  'routes' => [
+    'enabled' => true,
+    'prefix' => 'glide',
+    'middleware' => ['web'],
+  ],
+
+  /*
+    |--------------------------------------------------------------------------
+    | Image Presets
+    |--------------------------------------------------------------------------
+    |
+    | Predefined presets to facilitate consistent image usage
+    | throughout the application.
+    |
+    */
+  'presets' => [
+    'large' => ['dimensions' => '800', 'format' => 'webp', 'fit' => 'max'],
+    'medium' => ['dimensions' => '400', 'format' => 'webp', 'fit' => 'max'],
+    'social' => ['dimensions' => '1200x630', 'format' => 'jpg', 'fit' => 'crop'],
+    'thumbnail' => ['dimensions' => '150x150', 'format' => 'webp', 'fit' => 'crop'],
+  ],
+];
+```
 
 ### Main Route
 
@@ -55,9 +140,9 @@ This route captures any request that starts with `/img/` and redirects it to the
 
 ### File Structure
 
-- `app/Http/Controllers/ImageController.php`: Main controller for image processing
-- `app/Traits/HasImages.php`: Trait to facilitate use in models
-- `app/Console/Commands/CleanImageCache.php`: Command for cache cleaning
+- `src/Http/Controllers/ImageController.php`: Main controller for image processing
+- `src/Traits/HasImages.php`: Trait to facilitate use in models
+- `src/Console/Commands/CleanImageCache.php`: Command for cache cleaning
 - `config/images.php`: Configuration file
 - `routes/web.php`: Contains the route definition
 
@@ -266,7 +351,7 @@ The system now provides improved management of default images, based on configur
 Default images are configured in `config/images.php`:
 
 ```php
-'defaults' => [
+'fallback_images' => [
   'default' => 'defaults/no-image.jpg',
   'products' => 'defaults/product.jpg',
   'users' => 'defaults/user.jpg',
@@ -302,7 +387,7 @@ First, you need to register the command in Laravel. To do this, edit the `app/Co
 
 ```php
 protected $commands = [
-  \App\Console\Commands\CleanImageCache::class,
+  \MacCesar\LaravelGlideEnhanced\Console\Commands\CleanImageCache::class,
   // Other commands...
 ];
 ```
@@ -408,7 +493,7 @@ The `ImageController` handles image processing and HTTP response:
 ```php
 <?php
 
-namespace App\Http\Controllers;
+namespace MacCesar\LaravelGlideEnhanced\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Glide\GlideImage;
@@ -418,16 +503,19 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class ImageController extends Controller
+class ImageController
 {
+  /**
+   * Display an image with dynamic processing
+   *
+   * @param Request $request
+   * @param string $path
+   * @return Response
+   */
   public function show(Request $request, $path)
   {
-    // If the path starts with "storage/", adjust the search to use the 'public' disk
-    $disk = 'local';
-    if (strpos($path, 'storage/') === 0) {
-      $path = substr($path, strlen('storage/'));
-      $disk = 'public';
-    }
+    // Use the configured disk for images
+    $disk = config('images.disk', 'public');
 
     // Check if the image exists on the appropriate disk
     if (!Storage::disk($disk)->exists($path)) {
@@ -454,19 +542,34 @@ class ImageController extends Controller
       return $this->serveGlideImage(Storage::path($cachePath), true);
     }
 
-    // Prepare cache directory
+    // Prepare cache directory - Fixed to be concurrency-safe
     $cacheDirectory = dirname(Storage::path($cachePath));
-    if (!file_exists($cacheDirectory)) {
-      mkdir($cacheDirectory, 0755, true);
+    if (!is_dir($cacheDirectory)) {
+      try {
+        @mkdir($cacheDirectory, 0755, true);
+      } catch (\Exception $e) {
+        // Directory might have been created by another process
+        // Only log if it's not a "directory exists" issue
+        if (!is_dir($cacheDirectory)) {
+          Log::error("Failed to create cache directory: " . $e->getMessage());
+        }
+      }
     }
 
     try {
       // Get the full path of the image from the appropriate disk
       $sourcePath = Storage::disk($disk)->path($path);
 
+      // Check if watermark is being used and convert relative path to absolute
+      $params = $request->all();
+      if (isset($params['mark'])) {
+        // Convert the relative path of watermark to absolute path
+        $params['mark'] = Storage::disk('public')->path($params['mark']);
+      }
+
       // Manipulate the image with spatie/laravel-glide
       GlideImage::create($sourcePath)
-        ->modify($request->all())
+        ->modify($params)
         ->save(Storage::path($cachePath));
     } catch (\Exception $e) {
       Log::error("Error manipulating image: " . $e->getMessage(), [
@@ -513,29 +616,30 @@ class ImageController extends Controller
 
     // Try to get category mappings from configuration
     // With fallback to an empty array if it doesn't exist
-    $defaultImages = Config::get('images.defaults', [
+    $fallbackImages = Config::get('images.fallback_images', [
       'default' => 'defaults/no-image.jpg'
     ]);
 
     // First try with the specific category
-    if (array_key_exists($category, $defaultImages)) {
-      $defaultPath = $defaultImages[$category];
+    if (array_key_exists($category, $fallbackImages)) {
+      $defaultPath = $fallbackImages[$category];
     }
     // Then try with a generic image
-    else if (array_key_exists('default', $defaultImages)) {
-      $defaultPath = $defaultImages['default'];
+    else if (array_key_exists('default', $fallbackImages)) {
+      $defaultPath = $fallbackImages['default'];
     }
     // Finally use a hardcoded fallback as a last resort
     else {
       $defaultPath = 'defaults/no-image.jpg';
     }
 
-    // Look for the image on the public disk first
-    if (Storage::disk('public')->exists($defaultPath)) {
-      return ['disk' => 'public', 'path' => $defaultPath];
+    // Look for the image on the configured disk first
+    $disk = config('images.disk', 'public');
+    if (Storage::disk($disk)->exists($defaultPath)) {
+      return ['disk' => $disk, 'path' => $defaultPath];
     }
 
-    // If it doesn't exist in public, look on the local disk
+    // If it doesn't exist in the configured disk, look on the local disk
     if (Storage::exists($defaultPath)) {
       return ['disk' => 'local', 'path' => $defaultPath];
     }
@@ -569,19 +673,34 @@ class ImageController extends Controller
       return $this->serveGlideImage(Storage::path($cachePath), true);
     }
 
-    // Prepare cache directory
+    // Prepare cache directory - Fixed to be concurrency-safe
     $cacheDirectory = dirname(Storage::path($cachePath));
-    if (!file_exists($cacheDirectory)) {
-      mkdir($cacheDirectory, 0755, true);
+    if (!is_dir($cacheDirectory)) {
+      try {
+        @mkdir($cacheDirectory, 0755, true);
+      } catch (\Exception $e) {
+        // Directory might have been created by another process
+        // Only log if it's not a "directory exists" issue
+        if (!is_dir($cacheDirectory)) {
+          Log::error("Failed to create cache directory: " . $e->getMessage());
+        }
+      }
     }
 
     try {
       // Get the full path of the image from the appropriate disk
       $sourcePath = Storage::disk($disk)->path($path);
 
+      // Check if watermark is being used and convert relative path to absolute
+      $params = $request->all();
+      if (isset($params['mark'])) {
+        // Convert the relative path of watermark to absolute path
+        $params['mark'] = Storage::disk('public')->path($params['mark']);
+      }
+
       // Manipulate the image with spatie/laravel-glide
       GlideImage::create($sourcePath)
-        ->modify($request->all())
+        ->modify($params)
         ->save(Storage::path($cachePath));
     } catch (\Exception $e) {
       Log::error("Error manipulating default image: " . $e->getMessage(), [
@@ -599,12 +718,12 @@ class ImageController extends Controller
 
 ### HasImages Trait
 
-The `HasImages` trait makes using image processing from models easier:
+El `HasImages` trait makes using image processing from models easier:
 
 ```php
 <?php
 
-namespace App\Traits;
+namespace MacCesar\LaravelGlideEnhanced\Traits;
 
 use Illuminate\Support\Str;
 
@@ -825,7 +944,7 @@ trait HasImages
 ```php
 <?php
 
-namespace App\Console\Commands;
+namespace MacCesar\LaravelGlideEnhanced\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;

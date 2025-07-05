@@ -42,7 +42,7 @@ class ImageController
 
     // Create a unique hash for this combination of image and parameters
     $paramsHash = md5(json_encode($request->all()));
-    $cachePath = "cache/img/{$disk}/" . dirname($path) . '/' . $paramsHash . '_' . basename($path);
+    $cachePath = config('images.cache.path', 'cache/glide') . "/{$disk}/" . dirname($path) . '/' . $paramsHash . '_' . basename($path);
 
     // Check if it exists in cache
     if (Storage::exists($cachePath)) {
@@ -173,7 +173,7 @@ class ImageController
 
     // Create a unique hash for this combination of image and parameters
     $paramsHash = md5(json_encode($request->all()));
-    $cachePath = "cache/img/defaults/" . $paramsHash . '_' . basename($path);
+    $cachePath = config('images.cache.path', 'cache/glide') . "/defaults/" . $paramsHash . '_' . basename($path);
 
     // Check if it exists in cache
     if (Storage::exists($cachePath)) {

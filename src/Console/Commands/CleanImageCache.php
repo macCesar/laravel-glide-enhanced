@@ -34,7 +34,7 @@ class CleanImageCache extends Command
 
     if ($days > 0) {
       // Get cache directory
-      $cacheDir = 'cache/img';
+      $cacheDir = config('images.cache.path', 'cache/glide');
       $deleted = 0;
 
       // We are filtering files by modification date
@@ -59,7 +59,7 @@ class CleanImageCache extends Command
       }
     } else {
       // Clean all cache
-      Storage::deleteDirectory('cache/img');
+      Storage::deleteDirectory(config('images.cache.path', 'cache/glide'));
       $this->info("All image cache has been cleaned.");
     }
 

@@ -11,7 +11,7 @@ return [
     */
   'cache' => [
     'lifetime' => 30, // days
-    'path' => 'cache/img',
+    'path' => 'cache/glide',
   ],
 
   /*
@@ -66,7 +66,7 @@ return [
     */
   'routes' => [
     'enabled' => true,
-    'prefix' => 'img',
+    'prefix' => 'glide',
     'middleware' => ['web'],
   ],
 
