@@ -1,69 +1,70 @@
-# Guía de Actualización - Laravel Glide Enhanced
 
-## Cambio de Prefijo de Rutas (v2.x)
+# Upgrade Guide - Laravel Glide Enhanced
 
-### ⚠️ Cambio Importante: Nuevo Prefijo de Rutas
+## Route Prefix Change (v2.x)
 
-Para evitar conflictos con otros paquetes (especialmente `laravel-dropzone-enhanced`), hemos cambiado el prefijo por defecto de las rutas de `/img/` a `/glide/`.
+### ⚠️ Important Change: New Route Prefix
 
-### Lo que cambió:
+To avoid conflicts with other packages (especially `laravel-dropzone-enhanced`), we have changed the default route prefix from `/img/` to `/glide/`.
 
-**Antes:**
+### What changed:
+
+**Before:**
 ```
-http://tu-sitio.com/img/ruta/imagen.jpg
-```
-
-**Ahora:**
-```
-http://tu-sitio.com/glide/ruta/imagen.jpg
+https://your-site.com/img/path/image.jpg
 ```
 
-### Cómo actualizar:
+**Now:**
+```
+https://your-site.com/glide/path/image.jpg
+```
 
-#### Opción 1: Usar el nuevo prefijo (Recomendado)
-1. Publicar la nueva configuración:
+### How to update:
+
+#### Option 1: Use the new prefix (Recommended)
+1. Publish the new configuration:
 ```bash
 php artisan vendor:publish --provider="MacCesar\LaravelGlideEnhanced\ImageProcessorServiceProvider" --tag="config" --force
 ```
 
-2. Limpiar caché:
+2. Clear cache:
 ```bash
 php artisan route:clear
 php artisan config:clear
 php artisan cache:clear
 ```
 
-3. Actualizar cualquier referencia hardcodeada en tu código de `/img/` a `/glide/`
+3. Update any hardcoded references in your code from `/img/` to `/glide/`
 
-#### Opción 2: Mantener el prefijo anterior
-Si prefieres mantener el prefijo `/img/`, puedes modificar tu archivo `config/images.php`:
+#### Option 2: Keep the previous prefix
+If you prefer to keep the `/img/` prefix, you can modify your `config/images.php` file:
 
 ```php
 'routes' => [
     'enabled' => true,
-    'prefix' => 'img',  // Cambiar de 'glide' a 'img'
+    'prefix' => 'img',  // Change from 'glide' to 'img'
     'middleware' => ['web'],
 ],
 ```
 
-**Nota:** Si usas `laravel-dropzone-enhanced` junto con este paquete, se recomienda usar el nuevo prefijo `/glide/` para evitar conflictos de rutas.
+**Note:** If you use `laravel-dropzone-enhanced` together with this package, it is recommended to use the new `/glide/` prefix to avoid route conflicts.
 
-### Compatibilidad con Laravel Dropzone Enhanced
+### Compatibility with Laravel Dropzone Enhanced
 
-Si instalas ambos paquetes:
-- **Laravel Glide Enhanced** usará el prefijo `/glide/` para generar imágenes dinámicamente
-- **Laravel Dropzone Enhanced** usará el prefijo `/dropzone/` para sus funcionalidades
-- Los métodos del modelo `Photo` automáticamente detectarán y usarán Laravel Glide Enhanced cuando esté disponible
+If you install both packages:
+- **Laravel Glide Enhanced** will use the `/glide/` prefix to generate images dynamically
+- **Laravel Dropzone Enhanced** will use the `/dropzone/` prefix for its functionalities
+- The `Photo` model methods will automatically detect and use Laravel Glide Enhanced when available
 
-### Verificación
+### Verification
 
-Después de la actualización, verifica que las rutas estén registradas correctamente:
+After the update, verify that the routes are registered correctly:
 
 ```bash
 php artisan route:list | grep glide
 ```
 
-Deberías ver algo como:
+You should see something like:
 ```
 GET|HEAD  glide/{path} ... images.show
 ```

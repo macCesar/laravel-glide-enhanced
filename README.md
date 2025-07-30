@@ -6,8 +6,8 @@ A Laravel package for dynamic image processing based on [Spatie/Laravel-Glide](h
 
 The default route prefix has changed from `/img/` to `/glide/` to avoid conflicts with other packages, especially `laravel-dropzone-enhanced`.
 
-**Before:** `http://your-site.com/img/path/image.jpg`  
-**Now:** `http://your-site.com/glide/path/image.jpg`
+**Before:** `https://your-site.com/img/path/image.jpg`  
+**Now:** `https://your-site.com/glide/path/image.jpg`
 
 See the [UPGRADE.md](UPGRADE.md) file for migration instructions.
 
