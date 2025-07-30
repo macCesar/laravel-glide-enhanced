@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-07-30
+
+### Added
+
+- **New `Img` facade** - Added shorter alias facade for cleaner code
+- **Comprehensive documentation** - Enhanced README with detailed HasImages trait reference
+- **Image presets documentation** - Added detailed table with usage examples and custom presets
+- **Quick reference section** - Added common use cases and Glide parameters reference
+- **Blade template examples** - Added practical examples with responsive images
+- **Troubleshooting section** - Added comprehensive FAQ and common issues guide
+- **HasImages trait example** - Added visual example in demo file using correct method signatures
+
+### Changed
+
+- **Updated all README examples** to use new `Img::` facade for cleaner syntax
+- **Enhanced demo file** with HasImages trait usage example
+- **Documented both facades** - Users can choose between `ImageProcessor` or `Img`
+
+### Documentation
+
+- **Facades**: Both `ImageProcessor` and `Img` facades are now documented
+- **HasImages trait**: Complete method reference with real signatures from code
+- **Presets**: Detailed configuration and custom preset examples
+- **Blade templates**: Responsive image examples with picture elements
+- **Troubleshooting**: Solutions for common setup and performance issues
+
+## [2.0.2] - 2025-07-30
+
+### Documentation
+
+- **Enhanced README** with comprehensive HasImages trait documentation and examples
+- **Improved presets documentation** with detailed table and custom preset examples  
+- **Added quick reference section** with common use cases and parameter reference
+- **Enhanced Blade template examples** with responsive images and real-world scenarios
+- **Added comprehensive troubleshooting section** with common issues and FAQ
+- **Updated demo file** with correct HasImages method signatures
+
+## [2.0.1] - 2025-07-05
+
+### Fixed
+
+- Updated README and UPGRADE documentation to reflect correct URL scheme
+
 ## [2.0.0] - 2025-07-05
 
 ### ⚠️ BREAKING CHANGES

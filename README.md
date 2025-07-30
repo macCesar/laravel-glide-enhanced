@@ -131,19 +131,33 @@ If you need to avoid conflicts with other packages, you can change the route pre
 
 ## Basic Usage
 
+### Facades Available
+
+The package provides two facades for your convenience:
+
+```php
+// Option 1: Full facade name
+use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+
+// Option 2: Short alias (recommended for cleaner code)
+use MacCesar\LaravelGlideEnhanced\Facades\Img;
+```
+
+Both facades provide identical functionality. We recommend using `Img` for cleaner, more readable code.
+
 ### Image Processing URLs
 
 ```php
-use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+use MacCesar\LaravelGlideEnhanced\Facades\Img;
 
 // Basic URL with parameters
-ImageProcessor::url('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fit' => 'crop']);
+Img::url('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fit' => 'crop']);
 
 // WebP optimized URL
-ImageProcessor::webpUrl('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fit' => 'crop', 'q' => 90]);
+Img::webpUrl('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fit' => 'crop', 'q' => 90]);
 
 // Use a predefined preset
-ImageProcessor::preset('path/to/image.jpg', 'thumbnail');
+Img::preset('path/to/image.jpg', 'thumbnail');
 ```
 
 ### HasImages Trait for Eloquent Models
@@ -183,11 +197,11 @@ class Product extends Model
 
 ### Available Methods
 
-| Method                                                         | Parameters                                                                                                  | Return Type | Description                                          |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------- |
-| `getImageUrl($type, $dimensions, $format, $watermark, $extraParams)` | `string $type = 'default'`, `string $dimensions = null`, `string $format = 'pjpg'`, `string $watermark = null`, `array $extraParams = []` | `string`    | Generate image URL with custom parameters            |
-| `getImageWebpUrl($type, $params)`                              | `string $type = 'default'`, `array $params = []`                                                           | `string`    | Generate WebP optimized image URL                    |
-| `getImagePreset($type, $preset)`                               | `string $type = 'default'`, `string $preset = 'thumbnail'`                                                 | `string`    | Generate image URL using predefined preset           |
+| Method                                                               | Parameters                                                                                                                                | Return Type | Description                                |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------ |
+| `getImageUrl($type, $dimensions, $format, $watermark, $extraParams)` | `string $type = 'default'`, `string $dimensions = null`, `string $format = 'pjpg'`, `string $watermark = null`, `array $extraParams = []` | `string`    | Generate image URL with custom parameters  |
+| `getImageWebpUrl($type, $params)`                                    | `string $type = 'default'`, `array $params = []`                                                                                          | `string`    | Generate WebP optimized image URL          |
+| `getImagePreset($type, $preset)`                                     | `string $type = 'default'`, `string $preset = 'thumbnail'`                                                                                | `string`    | Generate image URL using predefined preset |
 
 ### Method Details
 
@@ -369,11 +383,11 @@ You can create your own presets by adding them to the configuration:
 ### Using Custom Presets
 
 ```php
-use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+use MacCesar\LaravelGlideEnhanced\Facades\Img;
 
-// Using ImageProcessor facade
-$cardImage = ImageProcessor::preset('products/image.jpg', 'product_card');
-$bannerImage = ImageProcessor::preset('banners/hero.jpg', 'banner');
+// Using Img facade
+$cardImage = Img::preset('products/image.jpg', 'product_card');
+$bannerImage = Img::preset('banners/hero.jpg', 'banner');
 
 // Using HasImages trait
 $product = Product::find(1);
@@ -398,14 +412,14 @@ $bannerImage = $product->getImagePreset('main', 'banner');
 The package provides a convenient way to generate srcset attributes for responsive images with different pixel densities:
 
 ```php
-use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+use MacCesar\LaravelGlideEnhanced\Facades\Img;
 
 // Generate srcset for 1x, 2x, and 3x pixel densities
-ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'fm' => 'webp']);
+Img::srcset('path/to/image.jpg', ['w' => 300, 'fm' => 'webp']);
 // Output: "/glide/storage/path/to/image.jpg?w=300&fm=webp 1x, /glide/storage/path/to/image.jpg?w=600&fm=webp 2x, /glide/storage/path/to/image.jpg?w=900&fm=webp 3x"
 
 // Control the maximum density factor (e.g., up to 2x)
-ImageProcessor::srcset('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fm' => 'webp'], 2);
+Img::srcset('path/to/image.jpg', ['w' => 300, 'h' => 200, 'fm' => 'webp'], 2);
 // Output: "/glide/storage/path/to/image.jpg?w=300&h=200&fm=webp 1x, /glide/storage/path/to/image.jpg?w=600&h=400&fm=webp 2x"
 ```
 
@@ -427,7 +441,7 @@ $product->getImageWebpUrl('gallery_1', ['w' => 600]);
 $post->getImagePreset('cover', 'social');
 
 // Responsive hero image
-ImageProcessor::srcset('hero/main.jpg', ['w' => 800, 'fm' => 'webp']);
+Img::srcset('hero/main.jpg', ['w' => 800, 'fm' => 'webp']);
 ```
 
 ### Most Used Glide Parameters
@@ -456,10 +470,10 @@ ImageProcessor::srcset('hero/main.jpg', ['w' => 800, 'fm' => 'webp']);
 You can apply watermarks to your images using the following parameters:
 
 ```php
-use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
+use MacCesar\LaravelGlideEnhanced\Facades\Img;
 
 // Apply watermark
-ImageProcessor::url('path/to/image.jpg', ['w' => 600, 'mark' => 'watermarks/logo.png', 'markw' => 200, 'markpos' => 'bottom-right', 'markalpha' => 60]);
+Img::url('path/to/image.jpg', ['w' => 600, 'mark' => 'watermarks/logo.png', 'markw' => 200, 'markpos' => 'bottom-right', 'markalpha' => 60]);
 
 // Using HasImages trait with watermark
 $product->getImageUrl('main', '600', 'jpg', 'watermarks/logo.png', [
@@ -502,7 +516,7 @@ $product->getImageUrl('main', '600', 'jpg', 'watermarks/logo.png', [
 ```blade
 <!-- Responsive image with srcset -->
 <img src="{{ $product->getImageWebpUrl('main', ['w' => 400]) }}"
-     srcset="{{ \MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor::srcset($product->main, ['w' => 400, 'fm' => 'webp']) }}"
+     srcset="{{ \MacCesar\LaravelGlideEnhanced\Facades\Img::srcset($product->main, ['w' => 400, 'fm' => 'webp']) }}"
      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
      alt="{{ $product->name }}"
      class="w-full h-auto">
