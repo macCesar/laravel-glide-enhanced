@@ -15,7 +15,7 @@ use MacCesar\LaravelGlideEnhanced\Http\Controllers\ImageController;
 
 if (config('images.routes.enabled', true)) {
   Route::prefix(config('images.routes.prefix', 'glide'))
-    ->middleware(config('images.routes.middleware', ['web']))
+    ->middleware(config('images.routes.middleware', ['web', 'throttle:60,1']))
     ->group(function () {
       Route::get('/{path}', [ImageController::class, 'show'])
         ->where('path', '.*')

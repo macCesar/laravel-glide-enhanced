@@ -10,8 +10,28 @@ return [
     |
     */
   'cache' => [
+    'disk' => 'local',
     'lifetime' => 30, // days
     'path' => 'cache/glide',
+    'headers' => [
+      'max_age' => 86400,
+      'stale_while_revalidate' => 3600,
+    ],
+  ],
+
+  'source_root' => 'images',
+  'watermark_root' => 'watermarks',
+  'allowed_mime_types' => ['image/jpeg', 'image/png', 'image/webp'],
+  'limits' => [
+    'max_width' => 4096,
+    'max_height' => 4096,
+    'max_megapixels' => 16,
+    'max_dpr' => 4,
+  ],
+  'allowed_parameters' => [
+    'w', 'h', 'fit', 'dpr', 'rect', 'or', 'bg', 'border', 'sharp', 'blur',
+    'gam', 'bright', 'con', 'sat', 'filt', 'mark', 'markw', 'markh',
+    'markfit', 'markx', 'marky', 'markpad', 'markpos', 'markalpha', 'fm', 'q',
   ],
 
   /*
@@ -67,7 +87,7 @@ return [
   'routes' => [
     'enabled' => true,
     'prefix' => 'glide',
-    'middleware' => ['web'],
+    'middleware' => ['web', 'throttle:60,1'],
   ],
 
   /*
