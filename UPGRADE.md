@@ -1,6 +1,35 @@
 
 # Upgrade Guide - Laravel Glide Enhanced
 
+## Upgrading to v3
+
+Version 3 is a breaking security and platform release:
+
+- PHP 8.2+ and Laravel 12 or 13 are required. Laravel 8–11 are no longer supported.
+- Move source images from the disk root to `<disk>/images/`, or set
+  `images.source_root` to a dedicated existing directory.
+- Move watermarks to `<disk>/watermarks/`, or set `images.watermark_root`.
+- Only decodable JPEG, PNG, and WebP files are accepted by default.
+- Width and height are capped at 4096, output cost at 16 megapixels, and DPR at 4.
+- Unknown or invalid Glide query parameters now return HTTP 422.
+- The public route uses `web` and `throttle:60,1` by default.
+- HTTP cache headers are configurable at `images.cache.headers`; responses include
+  ETag, Last-Modified, and `X-Content-Type-Options: nosniff`.
+- Cache cleanup now reads `images.cache.lifetime`. Explicit `--days=0` still
+  deletes the entire generated cache.
+
+Publish the new configuration and review it before clearing the old cache:
+
+```bash
+php artisan vendor:publish --tag=images-config --force
+php artisan images:clean-cache --days=0
+php artisan config:clear
+php artisan route:clear
+```
+
+Public URLs retain the `/glide/{path}?w=...` shape; the new source root is an
+internal filesystem boundary and does not appear in URLs.
+
 ## Route Prefix Change (v2.x)
 
 ### ⚠️ Important Change: New Route Prefix

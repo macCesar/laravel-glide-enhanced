@@ -2,7 +2,13 @@
 
 A Laravel package for dynamic image processing based on [Spatie/Laravel-Glide](https://github.com/spatie/laravel-glide).
 
-## ⚠️ Important Update (v2.x)
+## Important Update (v3.x)
+
+Version 3 supports Laravel 12–13 and PHP 8.2+. Image files are now isolated under
+the configured `images.source_root` (`images` by default), and public processing
+is rate-limited and strictly validated. See [UPGRADE.md](UPGRADE.md).
+
+## Previous Update (v2.x)
 
 The default route prefix has changed from `/img/` to `/glide/` to avoid conflicts with other packages, especially `laravel-dropzone-enhanced`.
 
@@ -47,8 +53,8 @@ php artisan vendor:publish --tag=images-config
 
 ## Requirements
 
-- PHP 8.0 or higher
-- Laravel 8.x, 9.x, 10.x, 11.x, or 12.x
+- PHP 8.2 or higher (Laravel 13 requires PHP 8.3+)
+- Laravel 12.x or 13.x
 - [Spatie's Laravel Glide package](https://github.com/spatie/laravel-glide)
 
 ## Configuration
@@ -59,9 +65,17 @@ The `config/images.php` file contains several configuration options:
 return [
     // Image cache configuration
     'cache' => [
+        'disk' => 'local',
         'lifetime' => 30, // days
         'path' => 'cache/glide',
+        'headers' => ['max_age' => 86400, 'stale_while_revalidate' => 3600],
     ],
+
+    // Files are resolved below <disk>/images and watermarks below <disk>/watermarks
+    'source_root' => 'images',
+    'watermark_root' => 'watermarks',
+    'allowed_mime_types' => ['image/jpeg', 'image/png', 'image/webp'],
+    'limits' => ['max_width' => 4096, 'max_height' => 4096, 'max_megapixels' => 16, 'max_dpr' => 4],
 
     // Default processing settings
     'defaults' => [
@@ -74,7 +88,7 @@ return [
     'routes' => [
         'enabled' => true,       // Enable/disable package routes
         'prefix' => 'glide',     // URL prefix for the image routes
-        'middleware' => ['web'],  // Middleware to apply to the routes
+        'middleware' => ['web', 'throttle:60,1'],
     ],
 
     // Disk configuration. Change to 'local' if your images are in /storage/app
@@ -101,16 +115,21 @@ return [
 
 ### Disk Configuration
 
-The `disk` configuration allows you to specify where your images are stored. By default, the package uses the `public` disk, which corresponds to the `/storage/app/public` directory. If your images are stored in a different location, such as the root of `/storage/app`, you can change the disk to `local` or any other disk defined in your Laravel filesystem configuration.
+The `disk` configuration selects a local Laravel filesystem. Sources are never
+read from its general root: with the defaults, `photo.jpg` resolves to
+`storage/app/public/images/photo.jpg`. Put watermarks in
+`storage/app/public/watermarks`. Remote disks such as S3 are not supported by
+the local image processor.
 
 ```php
 'disk' => 'public', // Change to 'local' if your images are in /storage/app
 ```
 
-For example, if your images are stored in `/storage/app`, update the configuration as follows:
+To retain another dedicated layout, configure its safe root explicitly:
 
 ```php
 'disk' => 'local',
+'source_root' => 'public-images',
 ```
 
 Make sure the disk you specify is properly configured in your `config/filesystems.php` file.
@@ -123,7 +142,7 @@ The routes section allows you to customize how the package registers its routes:
 'routes' => [
     'enabled' => true,        // Set to false to disable all package routes
     'prefix' => 'glide',      // Change the URL prefix (e.g., 'images', 'media', etc.)
-    'middleware' => ['web'],  // Add or modify middleware applied to the routes
+    'middleware' => ['web', 'throttle:60,1'],
 ],
 ```
 

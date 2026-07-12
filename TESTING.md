@@ -118,3 +118,21 @@ Buscar errores relacionados con:
 
 #### Problema: Conflictos entre paquetes
 **Solución:** Asegurarse de que ambos paquetes usen prefijos diferentes (`glide` vs `dropzone`).
+## Integration checklist: AdminKit + Laravel Dropzone Enhanced
+
+The package-level suite runs with `vendor/bin/phpunit`. For the documented host
+integration, install the package branch in an AdminKit application that also uses
+Laravel Dropzone Enhanced, then verify:
+
+1. Upload a JPEG, PNG, and WebP through Dropzone into the configured
+   `<disk>/<source_root>` directory.
+2. Render each upload through `Img::url()` and `HasImages`; confirm filenames with
+   spaces and Unicode load through `/glide/` while Dropzone continues using its
+   own route prefix.
+3. Confirm resize, WebP, preset, watermark, fallback, MISS/HIT, ETag, and a 304
+   conditional response.
+4. Confirm HTML/SVG uploads, traversal, unknown parameters, oversized dimensions,
+   and watermarks outside their root are rejected.
+5. Send more than 60 requests from one client within one minute and confirm 429.
+6. Run `php artisan images:clean-cache`, then `--days=0`, and confirm only the
+   generated Glide cache is affected.
