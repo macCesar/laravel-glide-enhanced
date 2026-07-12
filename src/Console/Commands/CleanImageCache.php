@@ -2,7 +2,6 @@
 
 namespace MacCesar\LaravelGlideEnhanced\Console\Commands;
 
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,7 +12,7 @@ class CleanImageCache extends Command
    *
    * @var string
    */
-  protected $signature = 'images:clean-cache {--days=0}';
+  protected $signature = 'images:clean-cache {--days= : Delete files at least this many days old; 0 deletes all files}';
 
   /**
    * The console command description.
@@ -25,30 +24,35 @@ class CleanImageCache extends Command
   /**
    * Execute the console command.
    */
-  public function handle()
+  public function handle(): int
   {
-    // Use the parameter value or the configuration value or 30 days as default
-    $days = $this->option('days') ?: config('images.cache_days', 30);
+    $option = $this->option('days');
+    $days = $option === null ? config('images.cache.lifetime', 30) : $option;
+
+    if (filter_var($days, FILTER_VALIDATE_INT) === false || (int) $days < 0) {
+      $this->error('The --days option must be a non-negative integer.');
+
+      return self::FAILURE;
+    }
+
+    $days = (int) $days;
+    $disk = config('images.cache.disk', 'local');
+    $storage = Storage::disk($disk);
+    $cacheDir = config('images.cache.path', 'cache/glide');
 
     $this->info("Cleaning image cache older than {$days} days...");
 
     if ($days > 0) {
-      // Get cache directory
-      $cacheDir = config('images.cache.path', 'cache/glide');
       $deleted = 0;
 
       // We are filtering files by modification date
-      if (Storage::exists($cacheDir)) {
-        $files = Storage::allFiles($cacheDir);
-        $now = Carbon::now();
+      if ($storage->exists($cacheDir)) {
+        $files = $storage->allFiles($cacheDir);
+        $cutoff = now()->subDays($days)->getTimestamp();
 
         foreach ($files as $file) {
-          // Get the modification time
-          $lastModified = Carbon::createFromTimestamp(Storage::lastModified($file));
-          $daysOld = $lastModified->diffInDays($now);
-
-          if ($daysOld >= $days) {
-            Storage::delete($file);
+          if ($storage->lastModified($file) <= $cutoff) {
+            $storage->delete($file);
             $deleted++;
           }
         }
@@ -59,10 +63,10 @@ class CleanImageCache extends Command
       }
     } else {
       // Clean all cache
-      Storage::deleteDirectory(config('images.cache.path', 'cache/glide'));
+      $storage->deleteDirectory($cacheDir);
       $this->info("All image cache has been cleaned.");
     }
 
-    return 0;
+    return self::SUCCESS;
   }
 }
