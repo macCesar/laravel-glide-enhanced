@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.0.0] - 2026-07-12
+
+### Security
+
+- Isolated sources and watermarks under configurable roots and reject traversal.
+- Reject undecodable and non-JPEG/PNG/WebP input, unknown parameters, and requests
+  exceeding dimensions, megapixels, quality, DPR, or allowed enum values.
+- Added default request throttling, normalized cache keys, safe logs, streaming,
+  `nosniff`, ETag, Last-Modified, and configurable HTTP cache headers.
+
+### Changed
+
+- **BREAKING:** Require PHP 8.2+ and Laravel 12–13; Laravel 8–11 are unsupported.
+- **BREAKING:** Resolve source files below `images/` and watermarks below
+  `watermarks/` by default.
+- Cache cleanup honors `images.cache.lifetime` and validates `--days`.
+- `HasImages` delegates processed URL generation to `ImageProcessor` and paths
+  are encoded segment by segment.
+
+### Added
+
+- PHPUnit/Testbench coverage and CI matrices for Laravel 12 and 13.
+- `images-config` publication tag alias.
+
 ## [2.1.0] - 2025-07-30
 
 ### Added
