@@ -6,8 +6,9 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static string url(string $path, array $params = [])
- * @method static string webpUrl(string $path, int $width, ?int $height = null, string $fit = 'max', int $quality = 85)
+ * @method static string webpUrl(string $path, array $params = [])
  * @method static string preset(string $path, string $preset = 'thumbnail')
+ * @method static string srcset(string $path, array $params = [], int $maxFactor = 3)
  * 
  * @see \MacCesar\LaravelGlideEnhanced\ImageProcessor
  */

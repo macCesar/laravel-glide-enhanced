@@ -2,8 +2,6 @@
 
 namespace MacCesar\LaravelGlideEnhanced;
 
-use Illuminate\Support\Str;
-
 class ImageProcessor
 {
   /**
@@ -15,22 +13,18 @@ class ImageProcessor
    */
   public function url(string $path, array $params = []): string
   {
-    // Normalize path first
     $path = ltrim($path, '/');
-
-    // Always ensure we have storage/ prefix for internal use
-    if (!Str::startsWith($path, 'storage/')) {
-      $path = 'storage/' . $path;
+    if (str_starts_with($path, 'storage/')) {
+      $path = substr($path, strlen('storage/'));
     }
 
-    // Remove storage/ from path for URL creation
-    $urlPath = substr($path, strlen('storage/'));
+    $urlPath = implode('/', array_map('rawurlencode', explode('/', $path)));
 
     // Get route prefix from config
     $prefix = config('images.routes.prefix', 'glide');
 
     // Build the URL with parameters
-    $url = url('/' . $prefix . '/' . $urlPath);
+    $url = url('/' . trim($prefix, '/') . '/' . $urlPath);
     if (!empty($params)) {
       $url .= '?' . http_build_query($params);
     }

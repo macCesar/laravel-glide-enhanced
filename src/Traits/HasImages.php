@@ -2,7 +2,6 @@
 
 namespace MacCesar\LaravelGlideEnhanced\Traits;
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use MacCesar\LaravelGlideEnhanced\Facades\ImageProcessor;
 
@@ -90,13 +89,11 @@ trait HasImages
     // Get default image configuration by type
     $fallbacks = config('images.fallback_images', []);
     if (isset($fallbacks[$type])) {
-      $prefix = config('images.routes.prefix', 'glide');
-      return asset($prefix . '/' . $fallbacks[$type]);
+      return ImageProcessor::url($fallbacks[$type]);
     }
 
     // General default value
-    $prefix = config('images.routes.prefix', 'glide');
-    return asset($prefix . '/defaults/no-image.jpg');
+    return ImageProcessor::url('defaults/no-image.jpg');
   }
 
   /**
@@ -173,16 +170,7 @@ trait HasImages
       return $path;
     }
 
-    // If the path starts with 'storage/', adjust it
-    if (Str::startsWith($path, 'storage/')) {
-      $path = substr($path, strlen('storage/'));
-      $prefix = config('images.routes.prefix', 'glide');
-      return url('/' . $prefix . '/' . $path) . '?' . http_build_query($params);
-    }
-
-    // Use the image processor
-    $prefix = config('images.routes.prefix', 'glide');
-    return url('/' . $prefix . '/' . $path) . '?' . http_build_query($params);
+    return ImageProcessor::url($path, $params);
   }
 
   /**
