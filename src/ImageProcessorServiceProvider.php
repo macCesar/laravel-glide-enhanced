@@ -36,7 +36,7 @@ class ImageProcessorServiceProvider extends ServiceProvider
     // Publish configuration
     $this->publishes([
       __DIR__ . '/../config/images.php' => config_path('images.php'),
-    ], ['config', 'glide-config']);
+    ], ['config', 'glide-config', 'images-config']);
 
     // Publish upgrade guide
     $this->publishes([
